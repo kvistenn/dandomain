@@ -1,10 +1,3 @@
-# Scraping af https://simpl-theme.smartweb.dk/framework/help/Controllers
-> Max dybde: 2
-
----
-
-# Kilde: https://simpl-theme.smartweb.dk/framework/help/Controllers (Niveau 0)
-
 Controllers
 # Documentation for 'Controllers'
 List of controllers
