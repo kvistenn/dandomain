@@ -1,0 +1,8 @@
+{
+  "name": "dandomain-theme",
+  "version": "1.0.0",
+  "description": "Dandomain webshop theme development knowledge base - Smarty templates, controllers, variables, SCSS and build system",
+  "author": {
+    "name": "Jens"
+  }
+}
