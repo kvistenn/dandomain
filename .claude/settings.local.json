@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/jens/Documents/Repos/dandomain show HEAD:skills/dandomain-theme-development/SKILL.md)",
+      "Bash(git -C /Users/jens/Documents/Repos/dandomain show HEAD:skills/dandomain-theme-development/references/template-structure.md)",
+      "Bash(git -C /Users/jens/Documents/Repos/dandomain show HEAD:skills/dandomain-theme-development/references/controllers-overview.md)",
+      "Bash(git:*)"
+    ]
+  }
+}

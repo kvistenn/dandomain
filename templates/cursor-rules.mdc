@@ -1,0 +1,269 @@
+---
+description: Dandomain webshop tema-udvikling med Smarty templates, controllers og SCSS. Aktiveres automatisk ved arbejde med .tpl filer, dandomain controllers, SCSS-styling og build-workflow.
+alwaysApply: true
+---
+
+# Dandomain Theme Development
+
+## Systemarkitektur
+
+| Komponent | Teknologi |
+|-----------|-----------|
+| Template engine | Smarty 3 (PHP-baseret, `.tpl` filer) |
+| Styling | SCSS + Compass mixins |
+| Build | Grunt (ældre temaer) / Gulp 5 + Tailwind CSS 4 (nyere temaer) |
+| Frontend JS | AngularJS 1.4.3 + jQuery |
+| CSS grid | 24-kolonne responsivt system |
+| Biblioteker | Fancybox, Select2, Owl Carousel |
+
+Blueprint-reference: `blueprints/template007_1/` indeholder et komplet fungerende tema med alle mønstre.
+
+---
+
+## Smarty Nøglemønstre
+
+### Assets
+
+```smarty
+{addLink href='assets/css/template.css'}
+{addLink href='assets/css/print.css' media='print'}
+{addScript src='assets/js/app.js'}
+```
+
+### Hent en samling (liste af entiteter)
+
+```smarty
+{collection assign=products controller=productList categoryId=$page.categoryId pageSize=12}
+{foreach $products as $product}
+    <h2>{$product->Title}</h2>
+    <a href="{$product->Link}">{$product->Title}</a>
+{/foreach}
+```
+
+### Hent en enkelt entitet
+
+```smarty
+{entity assign=product controller=product id=$page.productId}
+{$product->Title}
+{$product->Description}
+```
+
+### Hent controller-instans
+
+```smarty
+{controller assign=catCtrl type=productCategory}
+{$catCtrl->link($category->Id)}
+```
+
+### Include partials
+
+```smarty
+{include file='modules/product/product-list.tpl' productlist=$products}
+{include file='partials/top.tpl'}
+{include file="modules/widgets/cookie/cookie.tpl"}
+```
+
+### Platform hooks (i index.tpl)
+
+```smarty
+<head>
+    {head_include}
+</head>
+<body ...>
+    {body_include}
+    {pageTypeInclude}
+```
+
+### Hjælpere
+
+```smarty
+{breadcrumbs}
+{placeholdImage width=160 height=120}
+{csrf}
+{img src=$product->Image width=160 height=120 alt=$product->Title}
+```
+
+### Sidetype-betingelser
+
+```smarty
+{if $page.isFrontPage}...{/if}
+{if $page.type == 'product' && count($page.paths) == 1}
+    {* Produktkategori *}
+{elseif $page.type == 'product' && count($page.paths) == 2}
+    {* Produktside *}
+{/if}
+{if $general.isShop}...{/if}
+```
+
+---
+
+## Grid-system (24-kolonne)
+
+4 breakpoints – **total kolonner per breakpoint**:
+
+| Breakpoint | Prefix | Skærmbredde | Max kolonner |
+|------------|--------|-------------|--------------|
+| Small | `col-s-` | 0–480px | 4 |
+| Medium | `col-m-` | 480–768px | 12 |
+| Large | `col-l-` | 768–960px | 12 |
+| XLarge | `col-xl-` | 960px+ | 24 |
+
+```html
+<!-- Fuld bredde -->
+<div class="col-s-4 col-m-12 col-l-12 col-xl-24">...</div>
+
+<!-- Halvt layout (xl) -->
+<div class="col-s-4 col-m-6 col-l-6 col-xl-12">...</div>
+
+<!-- Container -->
+<div class="container with-xlarge">
+    <div class="row">
+        <div class="col-s-4 col-m-12 col-l-12 col-xl-24">...</div>
+    </div>
+</div>
+```
+
+---
+
+## Globale Template-variable
+
+### $page
+
+```smarty
+$page.type          {* 'text', 'product', 'news', 'blog', 'cart', 'checkout' *}
+$page.id
+$page.name
+$page.title
+$page.headline
+$page.isFrontPage   {* bool *}
+$page.isProduct     {* bool *}
+$page.isCart        {* bool *}
+$page.isCheckout    {* bool *}
+$page.productId     {* aktuelt produkt-ID *}
+$page.categoryId    {* aktuel kategori-ID *}
+$page.paths         {* array af URL-segmenter *}
+$page.breadcrumbs   {* array *}
+```
+
+### $general
+
+```smarty
+$general.isShop             {* bool - er det en shop? *}
+$general.languageIso639     {* 'da', 'en', 'no', 'sv' *}
+$general.domain
+$general.dateFormat
+$general.shopId
+```
+
+### $template.settings (design-variabler)
+
+```smarty
+{* Farver *}
+$template.settings.DESIGN_HEADER_BACKGROUND_COLOR
+$template.settings.DESIGN_BODY_BACKGROUND_COLOR
+$template.settings.DESIGN_FOOTER_BACKGROUND_COLOR
+$template.settings.DESIGN_BORDER_COLOR
+$template.settings.FONT_COLOR_PRIMARY
+$template.settings.FONT_COLOR_HEADLINE
+
+{* Knapper *}
+$template.settings.BUTTON_PRIMARY_BACKGROUND_COLOR
+$template.settings.BUTTON_PRIMARY_FONT_COLOR
+$template.settings.BUTTON_DEFAULT_BACKGROUND_COLOR
+
+{* Typografi *}
+$template.settings.FONT_FAMILY_BASE     {* 'Poppins', sans-serif|https://...' *}
+$template.settings.FONT_FAMILY_HEADLINE
+
+{* Feature-flags *}
+$template.settings.SETTINGS_SHOW_BREADCRUMB
+$template.settings.SETTINGS_SHOW_SEARCH
+$template.settings.SETTINGS_SHOW_CART
+$template.settings.SETTINGS_SHOW_MY_ACCOUNT
+$template.settings.SETTINGS_SHOW_SITEMAP
+```
+
+### $settings (shopindstillinger)
+
+```smarty
+$settings.shop_product_incl_vat
+$settings.shop_productlist_buy
+$settings.module_shop_one_step_checkout
+$settings.shop_product_variant_structure   {* 'dropdowns' *}
+$settings.shop_product_image_structure     {* 'zoom' *}
+$settings.module_shop_productlist_amount   {* '12-24-48-96' *}
+```
+
+### $currency
+
+```smarty
+$currency.iso        {* 'DKK' *}
+$currency.symbol
+$currency.decimal    {* ',' *}
+$currency.decimalCount
+```
+
+### $text
+
+Indeholder alle UI-tekster som nøgler, f.eks.:
+```smarty
+{$text.ADD_TO_CART}
+{$text.PRODUCT_CATALOG_FOCUS_FRONTPAGE_HEADLINE}
+{$text.CHECKOUT_COMPLETE_HEADLINE}
+```
+
+---
+
+## SCSS-struktur
+
+```
+source/
+├── scss/
+│   ├── template.scss       ← Hoved-entry (importerer alt)
+│   ├── globals/
+│   │   ├── _settings.scss  ← Breakpoints, farver, variabler
+│   │   └── _mixins.scss    ← Hjælper-mixins
+│   ├── framework/          ← Grid, reset, base-styles
+│   └── modules/            ← Komponent-specifik SCSS
+```
+
+Compass-mixins bruges (via `compass-mixins-template`):
+```scss
+@include border-radius(4px);
+@include box-shadow(0 2px 4px rgba(0,0,0,.1));
+@include transition(all .3s ease);
+```
+
+---
+
+## Blueprint Modulstruktur
+
+```
+modules/
+├── framework/      ← Email-skabeloner, print-layout
+├── product/        ← product.tpl, product-list.tpl, product-entity.tpl
+├── column/         ← Sidebar-bokse (module-cart, module-news osv.)
+├── widgets/        ← cookie, usp, slick, sidebar, notification
+├── calendar/
+├── blog/ (hvis til stede)
+├── form/
+├── contact/
+├── gallery/
+├── sitemap/
+└── notfound/
+partials/
+├── top.tpl         ← Header
+└── footer.tpl      ← Footer
+```
+
+**Konvention**: PageType-filer hedder det samme som sidetypens navn, f.eks. `modules/product/product.tpl` vises når `$page.type == 'product'`.
+
+---
+
+## Videre reference
+
+Fuld dokumentation findes i dandomain knowledge base repo: `{{DANDOMAIN_REPO}}`
+- Controllers (70+ stk.): `{{DANDOMAIN_REPO}}/controllers/controllers.md`
+- Template-variable (detaljeret): `{{DANDOMAIN_REPO}}/variables/variables.md`
+- UI-tekster: `{{DANDOMAIN_REPO}}/variables/text.md`
+- Blueprint-eksempel: `{{DANDOMAIN_REPO}}/blueprints/template007_1/`
